@@ -1,0 +1,122 @@
+---
+title: "161.122 Assessment C"
+author: "YOUR NAME AND STUDENT ID HERE"
+output: html_document
+---
+
+```{r setup general, message=FALSE}
+# Don't change this chunk unless you know what you're doing :)
+# Make sure you've installed each of these packages.
+library(tidyverse)
+library(visreg)
+library(tsibble)
+library(lubridate)
+```
+
+# Exercise C1
+
+```{r setup c1}
+# Don't change this chunk unless you know what you're doing :)
+ps4 <- read.csv(file="https://raw.githubusercontent.com/asukaminiland/161122/master/ConsoleSales.csv")
+ps4.ts <- ts(ps4$Sales,start=c(2013,11),frequency=12) %>% as_tsibble() %>% mutate(time=1:n()) %>%
+  mutate(month=month(index)) %>% mutate(month=factor(month)) 
+ps4.ts
+```
+
+## C1.1 
+Conduct an exploratory analysis on this time series. Describe the feature of this time series and explain the possible reason why the monthly PS4 sales shows this kind of pattern.
+
+```{r solution c1.1}
+
+```
+
+## C1.2
+Fit a regression model with only a linear trend to the monthly PS4 sales between Nov. 2013 and Dec. 2019. Visualise your model and comment on the R summary.
+
+```{r setup c1.2}
+# Don't change this chunk unless you know what you're doing :)
+ps4.ts.13.19 <- ps4.ts %>% filter(index<yearmonth("2020-1"))
+ps4.ts.13.19
+```
+
+```{r solution c1.2}
+
+```
+
+## C1.3 
+Suggest a better regression model for the time series in C1.2. Fit your suggested model, visualise your fitted model and comment on the R summary. [Hint: you may consider transformation, modifying trends, adding seasonal effects, etc.]
+
+```{r solution c1.3}
+
+```
+
+## C1.4
+Produce model diagnostic plots for your selected model. Are the assumptions of the linear model for time series met?  Explain your reasonings. 
+
+```{r solution c1.4}
+
+```
+
+## C1.5 
+Use your suggested model to forecast the PS4 sales for the first six months of the year
+2020. Compute the mean square error of your model. Comment on the prediction
+performance of your model. 
+
+```{r setup c1.5}
+# Don't change this chunk unless you know what you're doing :)
+ps4.ts.20 <- ps4.ts %>% filter(index>=yearmonth("2020-1") & index<=yearmonth("2020-6"))
+ps4.ts.20
+```
+
+```{r solution c1.5}
+
+```
+
+# Exercise C2
+
+```{r setup c2}
+# Don't change this chunk unless you know what you're doing :)
+nzincome <- read.csv(file="https://raw.githubusercontent.com/asukaminiland/161122/master/NZIncomes11.csv") %>% 
+  tibble() %>%  mutate(sex=factor(sex)) %>% mutate(ethnicity=factor(ethnicity)) 
+nzincome
+```
+
+## C2.1
+
+Produce plots of the weekly income (`income`) versus the variables `ethnicity`, `sex`, `agegrp`,`qualification` and `hours`, ensuring you clearly label axes. Comment on the plots, particularly with respect to whether there is (graphical) evidence for an association with the weekly wages.
+
+```{r solution c2.1}
+
+```
+
+## C2.2
+
+Fit a multivariable linear model for log weekly income (`income`) against the variables `ethnicity`, `sex`, `agegrp`,`qualification` and `hours`.  Peruse the R summary and interpret each significant coefficient at the level 0.05.
+
+```{r solution c2.2}
+
+```
+
+## C2.3
+
+Produce model diagnostic plots. Are the assumptions of the linear model met? Explain your reasoning.
+
+```{r solution c2.3}
+
+```
+
+## C2.4
+
+Produce a prediction for the weekly income of a 25 years old Asian man with a Bachelor degree working 40 hours per week along with a 95% prediction interval. Interpret this interval in words that a client may understand.
+
+```{r solution c2.4}
+
+```
+
+## C2.5
+
+Refit a multivariable linear model for log weekly income by adding an interaction term between `ethnicity` and `qualification`. Peruse the R summary and discuss your findings.
+
+```{r solution c2.5}
+
+```
