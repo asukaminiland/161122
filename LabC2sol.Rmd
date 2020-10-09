@@ -211,7 +211,7 @@ where 0.0475 is from `Estimate` and 0.0027 is from `Std. Error`. The multiple 2 
     
     **Answer:** Getting the corresponding `Estimate` and `Std.Error` from the R summary, we have
     $8.44  \pm 2 \times  0.55$,
-    or $(7.34,8.54)$.
+    or $(7.34,9.54)$.
 
 3. Continue reading `Coefficients:`
 
