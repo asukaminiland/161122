@@ -1,9 +1,8 @@
 ---
-title: "Lab C2"
-graphics: yes
+title: "Lab C2 - Inference and Prediction"
 output:
-  html_document: default
-  pdf_document: null
+  html_document: 
+    toc: yes
 ---
 
 Start by downloading the file `LabC2.Rmd` from Stream. Save it somewhere you can find it again (e.g. into Documents), then load up RStudio, and then use File->Open File... to load the notebook. `Knit` the notebook before reading the following instructions. 
@@ -22,7 +21,7 @@ Start by downloading the file `LabC2.Rmd` from Stream. Save it somewhere you can
 Start by downloading the file `LabC2.Rmd` from Stream. Save it somewhere you can find it again (e.g. into Documents), then load up RStudio, and then use File->Open File... to load the notebook.
 
 ```{r}
-    library(tidyverse)
+library(tidyverse)
 ```
 
 ## Exercise 1: Discover the truth hidden by errors

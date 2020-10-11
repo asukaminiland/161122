@@ -1,8 +1,8 @@
 ---
 title: "Lab C4: Time Series Regression"
-graphics: yes
 output:
-  html_document: default
+  html_document:
+    toc: yes
 ---
   
 ```{r}
@@ -113,11 +113,11 @@ visreg(hpi.lm, gg=TRUE) + xlab('Time Index') + ylab('House Price Index')
 
 **Optional Challenge: Make a log transformation on HPI and fit another linear model. Compare the R summary with the model without transformation. Perform the standard residual diagnostics on this model.** 
 
-2. A talented school student studied HPI before they learned the log transformation. They noticed noticed that HPI was increasing slowly at the beginning but increasing faster later. In other words, the increase in HPI occurs at an increasing rate for each successive time period. The student suggested that we may use a **quadratic** function instead of the linear function to model the trend as follows.
+2. A group of talented school students studied HPI before they learned the log transformation. They noticed that HPI was increasing slowly at the beginning but increasing faster later. In other words, the increase in HPI occurs at an increasing rate for each successive time period. The students suggested that we may use a **quadratic** function instead of the linear function to model the trend as follows.
 \[
 mean(y_t)=a+bt+ct^2.
 \]
-But the student didn't know how to find the coefficients $a,b,c$. Can we help?
+But the students didn't know how to find the coefficients $a,b,c$. Can we help?
 
 The answer is YES! Interestingly, this can be done via `lm()` easily as follows.
 
@@ -261,7 +261,7 @@ How can we extract the information on seasonality? A simple idea is to estimate 
 
 *Try to compute the residuals mean of each quarter by `summarise().`*
 
-5. The above procedures seems work well but tedious. A surprising fact is that we can complete these jobs with one line by `lm()` as follows. The trick is that we must turn `quarter` into a factor (categorical, qualitative) variable via `factor()` and include it in the regression formula in `lm()`.
+4. The above procedures seems work well but tedious. A surprising fact is that we can complete these jobs with one line by `lm()` as follows. The trick is that we must turn `quarter` into a factor (categorical, qualitative) variable via `factor()` and include it in the regression formula in `lm()`.
 
 ```{r}
 rts.ts.q <- rts.ts %>% mutate(quarter=factor(quarter(date))) 
@@ -296,7 +296,7 @@ Now the fitted curve looks much more reasonable! *Do you think there is any room
 
 *Try to visualise the model with `visreg()`. What do you find from the plots of `visreg()`.*
 
-6. We can predict the sales in 2019 as follows
+5. We can predict the sales in 2019 as follows
 ```{r}
 newtime <- data.frame(time=nrow(rts.ts)+(1:4),quarter=factor(1:4))
 augment(rts.lm.q,newdata=newtime)

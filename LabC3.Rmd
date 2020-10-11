@@ -1,11 +1,11 @@
 ---
 title: "Lab C3: Visualising models, diagnostics and transformations"
-graphics: yes
 output:
-  html_document: default
+  html_document:
+    toc: yes
 ---
 
-```{r, message=FALSE}
+```{r}
 library(tidyverse)
 ```
 
@@ -15,7 +15,7 @@ library(tidyverse)
 
 1. Load the package `datarium` and the data `marketing`. Fit the linear model, and save the result in the object `lm.youtube` again. Then, sweep your fitted result by the package `broom` and get the tidy version `lm.youtube`.
 
-    ```{r, eval=TRUE, message=FALSE}
+    ```{r}
     library(datarium)
     library(broom)
     data(`marketing`)
@@ -25,7 +25,7 @@ library(tidyverse)
 
 2. Get all prediction intervals for each observed `youtube` by calling `predict()` without supplying `new.data`, and save the result in `lm.youtube.pred`. We can then bind `lm.youtube.pred` with `lm.youtube.fit` by column with the R function `cbind()`, aka colunm bind.
 
-    ```{r, eval=TRUE, message=FALSE}
+    ```{r}
     lm.youtube.pred <- predict(lm.youtube, interval='prediction')
     lm.youtube.fit.pred <- lm.youtube.fit %>% cbind(lm.youtube.pred) %>% select(-fit) %>% tibble()
     lm.youtube.fit.pred
@@ -35,7 +35,7 @@ library(tidyverse)
 
 3. First, visualise your linear model with the fitted line and the scatter plot. You can then add the prediction band by the R function `geom_ribbon()` with `aes(ymin = lwr, ymax = upr)` which defines a shaded region bounded by the lower limits and upper limits of the prediction intervals in your plot. You may need to adjust `fill` and `alpha` in `geom_ribbon()` to get a nicer plot.
 
-    ```{r, eval=TRUE, message=FALSE}
+    ```{r}
     lm.youtube.fit.pred %>% ggplot(aes(x = youtube ,y=sales)) +
         geom_point() +
         geom_ribbon(aes(ymin = lwr, ymax = upr), fill = "grey70", alpha=0.5) +
@@ -235,7 +235,7 @@ We have to acknowledge that the residuals plots of `lm.youtube` suggest that the
 
     Nonetheless, the model fit should be a bit better, and will be curved. Notice that we've used a **linear** model to fit a curved relationship. The key is that the linearity of the model is in terms of the coefficients (each term can contain only one $\beta$ as a multiplier, and terms must be added together) not in terms of the way $y$ and $x$ are related. You can apply any transformation you like to $x$ and $y$ as needed to fit the data.
 
-6. You can also visualise the second linear model on the natural body weight scale by applying a transformation in the `visreg` command. Try the following:
+6. You can also visualise the second linear model on the natural scale by applying a transformation in the `visreg` command. Try the following:
 
     ```{r}
     visreg(lm.youtube.log, trans=exp, partial=TRUE, gg =TRUE)
