@@ -1,5 +1,5 @@
 ---
-title: "Lab C4: Time Series Regression"
+title: "Lab C4 - Time Series Regression"
 output:
   html_document:
     toc: yes

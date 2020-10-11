@@ -1,5 +1,5 @@
 ---
-title: "Lab C3: Visualising models, diagnostics and transformations"
+title: "Lab C3 - Diagnostics and Transformations"
 output:
   html_document:
     toc: yes

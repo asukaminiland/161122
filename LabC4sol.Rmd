@@ -1,8 +1,8 @@
 ---
-title: "Lab C4: Time Series Regression"
-graphics: yes
+title: "Solution to Lab C4"
 output:
-  html_document: default
+  html_document: 
+    toc: yes
 ---
 
 ```{r}

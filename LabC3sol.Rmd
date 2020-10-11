@@ -1,8 +1,8 @@
 ---
-title: "Lab C3: Visualising models, diagnostics and transformations"
-graphics: yes
+title: "Solution to Lab C3"
 output:
-  html_document: default
+  html_document: 
+    toc: yes
 ---
 
 ```{r}

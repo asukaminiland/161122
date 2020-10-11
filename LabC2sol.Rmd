@@ -1,9 +1,8 @@
 ---
-title: "Lab C2"
-graphics: yes
+title: "Solution to Lab C2"
 output:
-  html_document: default
-  pdf_document: null
+  html_document: 
+    toc: yes
 ---
 
 Start by downloading the file `LabC2.Rmd` from Stream. Save it somewhere you can find it again (e.g. into Documents), then load up RStudio, and then use File->Open File... to load the notebook. `Knit` the notebook before reading the following instructions. 
