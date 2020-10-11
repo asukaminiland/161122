@@ -1,4 +1,4 @@
-"EweTag","EweFeed","EweBCS","LambTag","DateOfBirth","Paddock","Sex","WeaningWeight"
+"EweTag","EweFeed","EweBodyConditionScore","LambTag","DateOfBirth","Paddock","Sex","WeaningWeight"
 1,"H","2.5",321,15,"I","Ewe",29
 1,"H","2.5",322,15,"I","Ewe",23
 2,"L","3",315,14,"B","Ram",31
