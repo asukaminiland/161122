@@ -92,6 +92,9 @@ To address the above issues, we have to model the relationship between `sales` a
 
 5. The diagnostics of a multivariable linear model follow the same principles in those of a simple linear model. *Let's take a look at the model diagnostics for the model with all three covariates. Produce 4-in-1 plots using `plot()`. Add some notes to your R notebook as to whether the model assumptions are satisfied*.
 
+    ```{r}
+
+    ```
 6. We can take a log of `sales` and refit a multivariable linear model as follows 
 
     ```{r}
@@ -115,7 +118,7 @@ To address the above issues, we have to model the relationship between `sales` a
 
 In Ex1, we have seen that, by including more covariates in `lm()`, the goodness of fit of our linear models, i.e. $R^2$, can be improved. Even if the new covariate is insignificant in the original model, $R^2$ of `lm.youboper` is slightly higher than `lm.youbook`. It is not hard to conclude that `lm.youbook` is much better than `lm.youtube`. But how can we choose between `lm.youbook` and `lm.youboper`? These two models seem in a dead heat with each other.
 
-An tricky fact is that $R^2$ will always be improved no matter what covariates is added into a linear model. This can be demonstrated by the following simulation study.
+An tricky fact is that $R^2$ will always be improved no matter what covariate is added into a linear model. This can be demonstrated by the following simulation study.
 
 1. Let's add in an additional variable to `marketing` as follows
 
@@ -251,9 +254,9 @@ In this exercise, we will study this critical issue arising from many real data 
 
     We see that R simply decides to exclude the variable `x3`. *Try to add another variable `x4=x2-x1` and re-fit a linear model `y~x1+x2+x4`. Discuss your findings.*
     
-    What if we do not remove `x4`?
+    What if we do not remove `x3`?
     
-    This creates a big trouble for R as a bit arithmetics will show that `y=x1+x2` is equivalent to `y=x3`. More crazily, we have `y=409x3-408x2-408x1`. There are infinite combinations of coefficients for our underlying linear model.
+    This creates a big trouble for R as a bit arithmetics will show that `y=0.5x1+0.5x2` is equivalent to `y=0.5x3`. More crazily, we have `y=408.5x3-408x2-408x1`. There are infinite combinations of coefficients for our underlying linear model.
     
     Why is this happening? It is simply because that `x3` can be predicted perfectly from `x1` and `x2` with a linear formula `x3=x2+x1`. The information contained in `x3` is redundant given the information from `x1` and `x2`.
     
@@ -284,7 +287,7 @@ In this exercise, we will study this critical issue arising from many real data 
 
     ```{r}
     set.seed(2022)
-    demo.collin  <- demo %>% mutate(x3.r=x1+x2+rnorm(n)) 
+    demo.collin  <- demo %>% mutate(x3.r=x1+x2+rnorm(n,sd=0.01)) 
     demo.collin
     ```
     
@@ -325,6 +328,10 @@ In this exercise, we will study this critical issue arising from many real data 
     ```{r}
     library(faraway)
     vif(lm.demo.collin)
+    ```
+    
+    ```{r}
+    vif(lm.youboper)
     ```
     
     In practice it is common to say that any VIF greater than 5 is cause for concern. So in this example we see there is a huge multicollinearity issue as all three predictors have a VIF greater than 5.

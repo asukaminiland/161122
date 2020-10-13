@@ -21,8 +21,6 @@ In the scientific research or social study, many predictors are not in a numeric
 
 In this lab we'll look at a data set from a recent study at Massey investigated the effect of feeding and body condition during late pregnancy and lactation on lamb performance until weaning.
 
-For this assignment we'll be looking at a dataset on the weaning weight of twin lambs.
-
 On day 141 of pregnancy, ewes with body condition score (BCS) of 2, 2.5 and 3 were allocated to a 'Low', 'Medium' or 'High' feeding treatment until weaning at day 79 of lactation. Of interest is whether there is a difference in the average weaning weight of their lambs between the treatments, and whether this is dependent on body condition score or other factors.
 
 The data set consists of the following variables from 540 twin lambs from 270 ewes.
@@ -101,14 +99,14 @@ We also remove two variables `EweTag` and `LambTag` which are not used in this w
     
     *Compare the model summaries of `lm.sex` and `lm.sex.dummy`. Discuss your findings.*
     
-    The binary-valued variable `SexRam.dummy` is called a **dummy variable** in regression model. Transforming **categorical covariates** to dummy variables is the standard way to handle categorical variables in linear models. 
+    The binary-valued variable `SexRam.dummy` is called a **dummy variable** in regression models. Transforming **categorical covariates** to dummy variables is the standard way to handle categorical variables in linear models. 
     
     *Visualise your fitted linear model by `visreg()` and compare the result with the previous boxplots. Discuss your findings.*
     
 3. We can further investigate the effect of `EweBodyConditionScore` on `WeaningWeight`. The groupwise means and boxplots are given as follows.
 
     ```{r}
-    weaning %>% group_by(EweBodyConditionScore) %>% summarise(mean.ww.sex=mean(WeaningWeight))
+    weaning %>% group_by(EweBodyConditionScore) %>% summarise(mean.ww.bcs=mean(WeaningWeight))
     weaning %>% ggplot(aes(y=WeaningWeight,x=factor(EweBodyConditionScore))) + geom_boxplot() + ggtitle('Stronger Ewes, Stronger Lambs?') + xlab('Body Condition Score')
     ```
 
@@ -131,7 +129,7 @@ We also remove two variables `EweTag` and `LambTag` which are not used in this w
     
     In the light of using `factor()` extensively, the categorical variable is also called the **factor** variable or just factor. The groups or categories implied by the categorical variable is called **levels** of the factor. We will use "factor" extensively in the following exercises.
     
-    `F-statistic` supports that this factor contributes to the explanation on the variations in `WeaningWeight`. How do we interpret the two `EweBCS` coefficients? Interpretting the model summary of `lm.bcs.nominal` is quite similar to that of `lm.sex`. The key is that we have three levels in the model. For factor variables, the interpretation is relative to the given baseline.  The baseline is just whatever level comes first (here, "EweBCS2"). E.g., the estimate of `EweBCS2.5` means that the mean `WeaningWeight` is `r coef(lm.bcs.nominal)["EweBCS2.5"]` higher among ewes with BCS 2.5 compared to ewes with BCS 2. Similarly, the mean `WeaningWeight` is `r coef(lm.bcs.nominal)["EweBCS3"]` higher among ewes with BCS 3 compared to ewes with BCS 2.
+    `F-statistic` supports that this factor contributes to the explanation on the variations in `WeaningWeight`. How do we interpret the two `EweBCS` coefficients? Interpretting the model summary of `lm.bcs.nominal` is quite similar to that of `lm.sex`. The key is that we have three levels in the model. For factor variables, the interpretation is relative to the given baseline.  The baseline is just whatever level comes first (here, "EweBCS2"). E.g., the estimate of `EweBCS2.5` means that the mean `WeaningWeight` is `r coef(lm.bcs.nominal)["EweBCS2.5"]` higher among ewes with BCS 2.5 compared to ewes with BCS 2. Similarly, the mean `WeaningWeight` is `r coef(lm.bcs.nominal)["EweBCS3"]` higher among ewes with BCS 3 compared to ewes with BCS 2. 
     
     The regression equation is given by
     
@@ -233,6 +231,10 @@ We have found that there is an effect of `Sex` on `WeaningWeight`, with `Ram` ge
 
 4. *Take a look at the model diagnostics. Are the model assumptions satisfied?*
 
+    ```{r}
+
+    ```
+    
 5. The above R summary supports the effects of `EweBCS` even if we control the effect of `Sex`.  This question can be further confirmed by using `anova()` as
 
     ```{r}
@@ -256,9 +258,9 @@ We have found that there is an effect of `Sex` on `WeaningWeight`, with `Ram` ge
     To address this issue, we can add two additional terms to our regression model as
     
      **mean[`WeaningWeight`]=26.6438+2.5350`SexRam`+1.4798`EweBCS2.5`+1.6737`EweBCS3` + 
-    $c$`SexRam``EweBCS2.5`+$d$`SexRam``EweBCS3`**
+    $c$`SexRamEweBCS2.5`+$d$`SexRamEweBCS3`**
     
-    $c$`SexRam``EweBCS2.5` and $d$`SexRam``EweBCS3` gives special attentions to rams with stronger mother ewes. The product of `SexRam` and `EweBCS2.5` is equal to 1 if and only if there is a ram with its mother ewe having BCS at 2.5. Similarly, the product of `SexRam` and `EweBCS3` is equal to 1 if and only if there is a ram with its mother ewe having BCS at 3. In either case, mean[`WeaningWeight`] will be increased by either $c$ or $d$ kg. 
+    $c$`SexRamEweBCS2.5` and $d$`SexRamEweBCS3` gives special attentions to rams with stronger mother ewes. The product of `SexRam` and `EweBCS2.5` is equal to 1 if and only if there is a ram with its mother ewe having BCS at 2.5. Similarly, the product of `SexRam` and `EweBCS3` is equal to 1 if and only if there is a ram with its mother ewe having BCS at 3. In either case, mean[`WeaningWeight`] will be increased by either $c$ or $d$ kg. 
     
     The above additional terms are called **interaction** terms. Adding interactions between `Sex` and `EweBCS` allows us to assess if the effect of `Sex` differing between the body condition scores of mother ewes. To include **interaction** terms in `lm()`, we add a term `Sex:EweBCS` as follows. We further perform an ANOVA on the resulted linear model.
     
@@ -325,7 +327,7 @@ $$
 
     *Use `anove()` to check the significance of the factor variable `Sex` in the above model.*
     
-2. We can produce a similar plot by using the `geom_smooth()` function in `ggplot`. Compare the plot above to the following one.
+2. We can produce a similar plot by using the `geom_smooth()` function in `ggplot2`. Compare the plot above to the following one.
 
     ```{r}
     weaning %>% ggplot(aes(x = DateOfBirth, y = WeaningWeight, color = Sex)) + geom_point() +
