@@ -11,6 +11,7 @@ library(tidyverse)
 library(visreg)
 library(tsibble)
 library(lubridate)
+library(broom)
 ```
 
 # Exercise C1
@@ -19,7 +20,7 @@ library(lubridate)
 # Don't change this chunk unless you know what you're doing :)
 ps4 <- read.csv(file="https://raw.githubusercontent.com/asukaminiland/161122/master/ConsoleSales.csv")
 ps4.ts <- ts(ps4$Sales,start=c(2013,11),frequency=12) %>% as_tsibble() %>% mutate(time=1:n()) %>%
-  mutate(month=month(index)) %>% mutate(month=factor(month)) 
+  mutate(month=month(index)) %>% mutate(month=factor(month))  %>% tibble()
 ps4.ts
 ```
 
