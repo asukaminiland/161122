@@ -1,0 +1,252 @@
+---
+title: "161.122 Assessment C"
+author: "Xun Xiao"
+output: html_document
+---
+
+```{r setup general, message=FALSE}
+# Don't change this chunk unless you know what you're doing :)
+# Make sure you've installed each of these packages.
+library(tidyverse)
+library(visreg)
+library(tsibble)
+library(lubridate)
+```
+
+# Exercise C1
+
+```{r setup c1}
+# Don't change this chunk unless you know what you're doing :)
+ps4 <- read.csv(file="https://raw.githubusercontent.com/asukaminiland/161122/master/ConsoleSales.csv")
+ps4.ts <- ts(ps4$Sales,start=c(2013,11),frequency=12) %>% as_tsibble() %>% mutate(time=1:n()) %>%
+  mutate(month=month(index)) %>% mutate(month=factor(month))
+ps4.ts
+```
+
+## C1.1 
+Conduct an exploratory analysis on this time series. Describe the feature of this time series and explain the possible reason why the monthly PS4 sales shows this kind of pattern.
+
+
+**Answer**: First of all, we make the scatter-line plot (run chart) of PS4 sales (`value`) over the calendar time (`index`). 
+
+From the scatter-line plot below, we can see very strong seasonal effects in PS4 sales. The boxplot further confirms the monthly seasonal effects with the sales peaking in November and December. Such pattern is commonly observed in the time series of sales and it can be largely explained by the yearly global promotions, e.g. black Friday and Xmas. 
+
+One can also see a trend in PS4 sales. It was increasing from 2014 to 2016 then decreasing later in 2017. This can be explained by the life cycle of a console. The smoothed curve in the scatter-line plot further confirms this fact. 
+
+```{r solution c1.1}
+ps4.ts %>% ggplot(aes(y=value,x=index)) + geom_point() + geom_line() +geom_smooth()
+ps4.ts %>% ggplot(aes(y=value,x=month)) + geom_boxplot() 
+```
+
+## C1.2
+Fit a regression model with only a linear trend to the monthly PS4 sales between Nov. 2013 and Dec. 2019. Visualise your model and comment on the R summary.
+
+```{r setup c1.2}
+# Don't change this chunk unless you know what you're doing :)
+ps4.ts.13.19 <- ps4.ts %>% filter(index<yearmonth("2020-1"))
+ps4.ts.13.19
+```
+
+
+**Answer**: We fit a linear model with the formula `value~time`, print the summary table with `summary()`, and visualise the fitted line with `visreg()`. 
+
+The summary table suggests that the linear trend does not explain much variations in PS4 sales since the coefficient of `time` is not significant at the level 0.05. The baseline is significant but it is just the monthly average sales of PS4. Extremely small `Multiple R-squared` and the visualisation (with a nearly flatten line) further confirm the results.
+
+```{r solution c1.2}
+ps4.ts.13.19.lm <- lm(value~time,data=ps4.ts.13.19)
+summary(ps4.ts.13.19.lm)
+visreg(ps4.ts.13.19.lm,gg=TRUE)
+```
+
+## C1.3 
+Suggest a better regression model for the time series in C1.2. Fit your suggested model, visualise your fitted model and comment on the R summary. [Hint: you may consider transformation, modifying trends, adding seasonal effects, etc.]
+
+**Answer**: We consider log transformation on sales, a quadratic trend and  monthly seasonal effects. The model is fitted with `lm()` and the R summary is presented as follows. The ANOVA table is generated with `anova()` to check the significance of each variable in the regression model. We further use both `visreg()` and `augment()` to visualise the partial regression and the fitted time series.
+
+Both the linear term and quadratic term are significant in the model. Not all the coefficients of the levels of `month` are significant (at the level 0.05). But the ANOVA table confirms that the factor `month` still explains a lot variations in PS4 sales. Especially, the two levels of `month11` and `month12` are highly significant which agrees with the exploratory analysis. `Multiple R-squared` (0.922) has been improved dramatically from the poor fit of the model with only a linear trend. 
+
+The visualisation suggests that the model fails to pick up some peaks in this time series which indicates some room for further improvement.
+
+```{r solution c1.3}
+ps4.ts.13.19.log.qm.s <- lm(log(value)~time+I(time^2)+month,data=ps4.ts.13.19)
+summary(ps4.ts.13.19.log.qm.s)
+anova(ps4.ts.13.19.log.qm.s)
+visreg(ps4.ts.13.19.log.qm.s,trans=exp,partial=TRUE,gg=TRUE)
+library(broom)
+augment(ps4.ts.13.19.log.qm.s,ps4.ts.13.19) %>% ggplot(aes(y=value,x=index)) + geom_point() + geom_line(aes(y=exp(.fitted)))
+```
+
+## C1.4
+Produce model diagnostic plots for your selected model. Are the assumptions of the linear model for time series met?  Explain your reasoning. 
+
+
+**Answer**: First of all, we make the 4-in-1 diagnostics plot with `plot()`. All four plots look good.
+
+We further make the residuals versus time plot. Notice that we have to use the standardised residuals `.std.resid` as we performed the log transformation on $y$ (`value`). We further add the smoothed curve by `geom_smooth()` and a baseline $y=0$ by `geom_hline()`. We can see some strange patterns the residuals versus time plot which implies that the successive residuals are correlated. The independence assumption on residuals is not satisfied. 
+
+```{r solution c1.4}
+plot(ps4.ts.13.19.log.qm.s)
+augment(ps4.ts.13.19.log.qm.s) %>% ggplot(aes(y=.std.resid,x=time)) + geom_point() + geom_line() + geom_hline(yintercept = 0) + geom_smooth()
+```
+
+## C1.5 
+Use your suggested model to forecast the PS4 sales for the first six months of the year 2020. Compute the mean square error of your model. Comment on the prediction performance of your model. 
+
+```{r setup c1.5}
+# Don't change this chunk unless you know what you're doing :)
+ps4.ts.20 <- ps4.ts %>% filter(index>=yearmonth("2020-1") & index<=yearmonth("2020-6"))
+ps4.ts.20
+```
+
+**Answer**: First of all, set up the `newtime` for prediction. The prediction can be done by exponentiating the results of `predict()`.
+
+The mean square error can be calculated by `summarise()` as follows. Just notice that we have to turn the result to a tidy tibble via `tibble()`. Alternatively, one can directly compute MSE as `mean((ps4.ts.20$value-ps4.ts.20.pred)^2)`.
+
+The MSE is very large and we can find that the predictions for February, April and May are extremely bad. Those bad predictions can be explained by the shock of Covid-19. The outbreak of Covid-19 in China early in this year impacts the global supply chain of PS4 and make PS4 in short supply. So the sales in February has been much lower than the predictions. The global pandemic leads to the lock down in many countries which promotes the sales of PS4 consoles as one of best home entertainment systems. The high demand in PS4 pushes the actual PS4 sales to a peak in April and May. 
+
+```{r solution c1.5}
+newtime <- data.frame(time=nrow(ps4.ts.13.19)+(1:6),month=factor(1:6))
+ps4.ts.20.pred <- exp(predict(ps4.ts.13.19.log.qm.s, newdata=newtime))
+ps4.ts.20.pred
+ps4.ts.20 %>% mutate(pred=ps4.ts.20.pred) %>% tibble() %>% summarise(mse=mean((value-pred)^2))
+```
+
+# Exercise C2
+
+```{r setup c2}
+# Don't change this chunk unless you know what you're doing :)
+nzincome <- read.csv(file="https://raw.githubusercontent.com/asukaminiland/161122/master/NZIncomes11.csv") %>% 
+  tibble() %>%  mutate(sex=factor(sex)) %>% mutate(ethnicity=factor(ethnicity)) 
+nzincome
+```
+
+## C2.1
+
+Produce plots of the weekly income (`income`) versus the variables `ethnicity`, `sex`, `agegrp`,`qualification` and `hours`, ensuring you clearly label axes. Comment on the plots, particularly with respect to whether there is (graphical) evidence for an association with the weekly wages.
+
+**Answer**: Notice that `hours` is numerical. We make a scatter plot for it. `agegrp` and `qualification` are both ordinal, we can make either box-plots or scatter plots for them. For `ethnicity` and `sex` as they are (nominal) factors. 
+
+If we plot `income` as `y` directly, the plots will be very hard to read due to some outliers. Therefore, we use `log(income)` as `y` in `aes()`.
+
+It is very hard to figure any significant differences between log incomes of  different ethnicities. The males seem to make more money than females. The incomes were increasing with the age quickly but started decreasing slowly later. The people with higher qualification have a slightly higher income. The working hours is positively correlated with the income which is not amazing. 
+
+```{r solution c2.1}
+nzincome %>% ggplot(aes(y=log(income),x=ethnicity)) + geom_boxplot()
+nzincome %>% ggplot(aes(y=log(income),x=sex)) + geom_boxplot()
+nzincome %>% ggplot(aes(y=log(income),x=factor(agegrp))) + geom_boxplot()
+nzincome %>% ggplot(aes(y=log(income),x=factor(qualification))) + geom_boxplot()
+nzincome %>% ggplot(aes(y=log(income),x=hours)) + geom_point()
+```
+
+## C2.2
+
+Fit a multivariable linear model for log weekly income (`income`) against the variables `ethnicity`, `sex`, `agegrp`,`qualification` and `hours`.  Peruse the R summary and interpret each significant coefficient at the level 0.05.
+ 
+**Answer**: 
+The overall `F statistics` suggests that our model catches some relationships between log weekly income and other variables. The `Multiple R squared` 0.5265 means that our model explains more than half of the variations in the log weekly income.
+
+After we control `log(hour)`, `agegrp`, `qualification`, it seems that both  `ethnicity` and `sex` are no longer significant. This is confirmed by both ANOVA table and summary table. New Zealand seems doing well in promoting equal rights.
+
+For the rest three variables, `log(hour)` is significant with a coefficient 0.8435. Notice that $y$ is the log weekly income and $x$ is the log weekly working hour. If we hold all other variables fixed, we have 
+\[
+\log(\mbox{income})=\alpha+\beta\log(\mbox{hour})=\alpha+0.8435\log(\mbox{hour}).
+\]
+It further implies a sublinear power law relationship between `income` and `hour` as
+\[
+\mbox{income}=k\cdot(\mbox{hour})^{0.8435},~k=e^\alpha.
+\]
+Wow, working longer does not means your earnings in proportion. Here, we use `log(hour)` rather than `hour` as the later implies an exponential relationship between `income` and `hour`. This is not reasonable. 
+
+The coefficient of `agegrp` is also significant with a positive value 0.0064. If we hold all other variables fixed, we have 
+\[
+\log(\mbox{income})=\alpha'+\beta'\cdot\mbox{agegrp}=\alpha'+ 0.0064\cdot\mbox{agegrp}.
+\]
+It implies an exponential relationship as 
+\[
+\mbox{income}=k'\cdot\exp(0.0064\cdot\mbox{agegrp}),~k'=e^{\alpha'}.
+\]
+You may feel worried about the exponential relationship. A surrogate is to use `log(agegrp)` instead of `agegrp`. It will slightly improve both `Multiple R-squared` and `Adjusted R-squared`. Anyway, the result suggests that people make more money when they are getting old.
+
+The levels (`3`,`4`) in `qualification` are significant. A higher degree increases your salary(on average). They become a part of the intercept $\alpha$ and further act as a part of the multiplicative constant $k$. 
+
+ 
+```{r solution c2.2}
+nzincome.nominal <- nzincome %>% mutate(qualification=factor(qualification))
+income.lm.log <- lm(log(income)~log(hours)+agegrp+qualification+ethnicity+sex,data=nzincome.nominal)
+anova(income.lm.log)
+summary(income.lm.log)
+visreg(income.lm.log)
+```
+
+Alternatively, one can treat `agegrp` as a factor or adding a quadratic term `I(agegrp^2)` given the results in the exploratory analysis. The following R code chunk completes the latter job.
+```{r solution c2.2 a}
+income.lm.log.qage <- lm(log(income)~log(hours)+agegrp+I(agegrp^2) +qualification+ethnicity+sex,data=nzincome.nominal)
+anova(income.lm.log.qage)
+summary(income.lm.log.qage)
+visreg(income.lm.log.qage)
+```
+
+## C2.3
+
+Produce model diagnostic plots. Are the assumptions of the linear model met? Explain your reasoning.
+
+**Answer**: 
+
+The linearity condition looks ok from the residuals vs fitted plot.
+
+The equal variance condition looks ok from the residuals vs fitted plot and the scale location plot. 
+
+Normal Q-Q plot suggests that the normality is certainly violated.
+
+Residuals vs leverage plot does not report obvious outliers. 
+
+**The results can be dramatically different if you use `hour` as the predictor directly.**
+
+```{r solution c2.3}
+plot(income.lm.log)
+```
+
+## C2.4
+
+Produce a prediction for the weekly income of a 25 years old Asian man with a Bachelor degree working 40 hours per week along with a 95% prediction interval. Interpret this interval in words that a client may understand.
+
+**Answer**: The prediction interval suggests that 95% of 25-years old Asian men with a Bachelor degree working 40 hours per week will receive a weekly income between 375.72 NZD and 2618.382 NZD.
+
+```{r solution c2.4}
+newperson<-data.frame(hours=40,agegrp=25,qualification="4",ethnicity="Asian",sex="male")
+exp(predict(income.lm.log,newdata=newperson,interval="prediction"))
+```
+
+## C2.5
+
+Refit a multivariable linear model for log weekly income by adding an interaction term between `ethnicity` and `qualification`. Peruse the R summary and discuss your findings.
+
+
+**Answer**:
+
+We add the interaction term between `ethnicity` and `qualification` by `ethnicity:qualification`.
+
+The interpretations of the summary table and ANOVA table are similar. An interaction term between two factor variables modifies the intercept $\alpha$ in the linear model (the multiplicative constant $k$ in exponential or power law model).
+
+We can find an interesting fact, i.e., despite the main effect of `ethnicity` is not significant in the ANOVA table, its interaction with `qualification` is significant. The interaction term provides us refined grouping of the population and identifies that groups of people with specific `qualification` and `ethnicity` have different average weekly incomes. Particularly, the Asians with the qualification 1 have quite high weekly incomes compared with other ethnicities with the qualification 1.
+
+```{r solution c2.5}
+income.lm.log.inter <- lm(log(income)~log(hours)+agegrp+qualification+ethnicity+sex+ethnicity:qualification,data=nzincome.nominal)
+anova(income.lm.log.inter)
+summary(income.lm.log.inter)
+visreg(income.lm.log.inter,xvar='qualification',by='ethnicity',overlay=FALSE)
+visreg(income.lm.log.inter,xvar='ethnicity',by='qualification',overlay=FALSE)
+```
+
+We can also add the interaction term between `sex` and `hours` by `sex:hours`.
+
+The interpretations of the summary table and ANOVA table are similar. An interaction term between a factor variable and a numerical variable modifies the slope $\beta$ in the linear model (the rate or power $\beta$ in exponential or power law model).
+
+An interesting result is that, although the average weekly incomes of males and females are close, the curves against hours are different. The males make more money than female when both work longer. This suggests there may still be unfairness in more refined workforce sectors in NZ.
+
+```{r solution c2.5 a}
+income.lm.log.inter2 <- lm(log(income)~log(hours)+agegrp+qualification+ethnicity+sex+sex:hours,data=nzincome.nominal)
+anova(income.lm.log.inter2)
+summary(income.lm.log.inter2)
+visreg(income.lm.log.inter2,xvar='hours',by='sex',overlay=TRUE)
+```
