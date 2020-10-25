@@ -149,11 +149,11 @@ After we control `log(hour)`, `agegrp`, `qualification`, it seems that both  `et
 
 For the rest three variables, `log(hour)` is significant with a coefficient 0.8435. Notice that $y$ is the log weekly income and $x$ is the log weekly working hour. If we hold all other variables fixed, we have 
 \[
-\log(\mbox{income})=\alpha+\beta\log(\mbox{hour})=\alpha+0.8435\log(\mbox{hour}).
+\log(\mbox{income})=\alpha+\beta\log(\mbox{hour})=\alpha+0.8564\log(\mbox{hour}).
 \]
 It further implies a sublinear power law relationship between `income` and `hour` as
 \[
-\mbox{income}=k\cdot(\mbox{hour})^{0.8435},~k=e^\alpha.
+\mbox{income}=k\cdot(\mbox{hour})^{0.8564},~k=e^\alpha.
 \]
 Wow, working longer does not means your earnings in proportion. Here, we use `log(hour)` rather than `hour` as the later implies an exponential relationship between `income` and `hour`. This is not reasonable. 
 
